@@ -1,1 +1,6 @@
 raw_data/
+.env
+.envrc
+.DS_Store
+.streamlit/
+*.json
