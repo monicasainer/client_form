@@ -24,6 +24,10 @@ class Extract:
         credentials = service_account.Credentials.from_service_account_info(
         st.secrets["gcp_service_account"], scopes=scope)
 
+        # path = os.getenv("PATH_TO_CREDENTIALS")
+
+        # credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
+
         # Create a client to interact with Google Sheets using the credentials
         clients = Client(scope=scope, creds=credentials)
 
