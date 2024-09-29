@@ -47,5 +47,6 @@ class Extract:
         worksheet = sh.worksheet(worksheet_name)
 
         df = pd.DataFrame(worksheet.get_all_records())
+        df = df.reset_index(drop=True)
 
         return df
