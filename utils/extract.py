@@ -21,15 +21,8 @@ class Extract:
         scope = ["https://spreadsheets.google.com/feeds",
                 "https://www.googleapis.com/auth/drive"]
 
-        # Load service account credentials from Streamlit secrets
-        # credentials = service_account.Credentials.from_service_account_info(
-        #     st.secrets["gcp_service_account"],
-        #     scopes=scope
-        # )
-        # credentials = ServiceAccountCredentials.from_json_keyfile_name('testingdb-b6d4d-d0a2646c069a.json', scope)
-        path= os.getenv('PATH_TO_CREDENTIALS')
-        credentials = service_account.Credentials.from_service_account_file(f'{path}',  # Update this with the path to your JSON file
-        scopes=scope)
+        credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], scopes=scope)
 
         # Create a client to interact with Google Sheets using the credentials
         clients = Client(scope=scope, creds=credentials)
