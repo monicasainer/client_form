@@ -1,15 +1,17 @@
 # Core libraries
-streamlit
-pandas
+streamlit==1.38.0
+pandas==2.2.3
 
 # Google API libraries
-google-auth
-google-auth-oauthlib
+google-auth==2.35.0
+google-auth-oauthlib==1.2.1
 gspread==5.10.0
-gspread-pandas==2.4.5
+gspread-pandas==3.3.0
 
 # Utils for forms, selection, and menus
 streamlit-option-menu
 
 # Additional utilities
 pathlib==1.0.1
+
+
