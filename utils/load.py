@@ -23,17 +23,9 @@ class Load:
         scope = ["https://spreadsheets.google.com/feeds",
                  "https://www.googleapis.com/auth/drive"]
 
-        # Get the path to the credentials file from environment variable
-        path = os.getenv('PATH_TO_CREDENTIALS')
-
-        if path is None:
-            raise ValueError("Environment variable 'PATH_TO_CREDENTIALS' not set.")
-
         # Authenticate using the service account credentials
-        credentials = service_account.Credentials.from_service_account_file(
-            path,
-            scopes=scope
-        )
+        credentials = service_account.Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"], scopes=scope)
 
         # Authorize the client
         client = authorize(credentials)
