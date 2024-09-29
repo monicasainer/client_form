@@ -1,4 +1,18 @@
+# Core libraries
 streamlit
 pandas
-numpy
+
+# Google API libraries
+google-auth
+google-auth-oauthlib
+gspread
+gspread-pandas
+
+# Image processing
+Pillow==10.0.1
+
+# Utils for forms, selection, and menus
 streamlit-option-menu
+
+# Additional utilities
+pathlib==1.0.1
