@@ -5,8 +5,8 @@ pandas
 # Google API libraries
 google-auth
 google-auth-oauthlib
-gspread
-gspread-pandas
+gspread==5.10.0
+gspread-pandas==2.4.5
 
 # Utils for forms, selection, and menus
 streamlit-option-menu
