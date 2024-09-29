@@ -20,3 +20,19 @@ class Transform:
         cleaned_name = ' '.join(words)
 
         return cleaned_name
+
+    def lowercase_letters(name) ->str:
+        """
+        Converts the input string to lowercase and ensures there is only one space between words.
+
+        Args:
+            name (str): The input string to be converted to lowercase.
+
+        Returns:
+            str: A new string with all characters in lowercase and only one space between words.
+        """
+        new_name = str(name).lower()
+        words = new_name.split()
+        cleaned_name = ' '.join(words)
+
+        return cleaned_name
