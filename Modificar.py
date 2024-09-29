@@ -17,14 +17,14 @@ def app():
     names_list = df_unique.unique()
 
     # Seleccionar la compañía fuera del formulario para que sea dinámico
-    company_name = st.selectbox("Compañía:", tuple(names_list))
+    company_name = st.selectbox("Compañía:", tuple(names_list),index=False)
 
     # Filtrar los datos con base en el nombre de la compañía seleccionado
     if company_name:
         df_filtered = data[data['nombre'] == company_name]
 
         # Mostrar los detalles del cliente con la versión máxima
-        df_max_v = df_filtered.loc[df_filtered['Versión'].idxmax()]
+        df_max_v = df_filtered.loc[df_filtered['versión'].idxmax()]
 
         st.write(f"Has seleccionado la compañía: {df_max_v['nombre']}")
 
@@ -126,7 +126,7 @@ def app():
 
             # Convertir valores numéricos de pandas a tipos nativos de Python
             customer_id = str(df_max_v['cliente_id'])
-            version = int(df_max_v['Versión']) + 1
+            version = int(df_max_v['versión']) + 1
 
             row = [customer_id, company_name, cif, email, phone, address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
 

@@ -91,7 +91,7 @@ def app():
                                          "ACTIVIDADES DE LOS HOGARES COMO EMPLEADORES; ACTIVIDADES DE PRODUCCIÓN DE BIENES Y SERVICIOS NO DIFERENCIADOS DE LOS HOGARES PARA USO PROPIO",
                                          "ACTIVIDADES DE ORGANIZACIONES Y ORGANISMOS EXTRATERRITORIALES"))
                 date = st.date_input("Fecha actual", format="DD/MM/YYYY")
-                info = st.text_area("Información Additional")
+                info = st.text_area("Información Adicional")
                 info = Transform.capital_letters(info)
 
                 # Preparar datos para guardar

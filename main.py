@@ -1,6 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
-import Inicio,Modificar,Nuevo
+import Inicio,Modificar,Nuevo,Albaran
 
 
 
@@ -19,7 +19,7 @@ class ClientForm:
         with st.sidebar:
             app = option_menu(
                 menu_title = "Formulario de cliente",
-                options = ['Inicio','Nuevo','Modificar'],
+                options = ['Inicio','Nuevo','Modificar','Albaran'],
                 icons = ['house-fill','person-circle','pen'],
                 menu_icon = "menu-app",
                 default_index = 0,
@@ -39,4 +39,6 @@ class ClientForm:
         if app == "Modificar":
             Modificar.app()
 
+        if app == "Albaran":
+            Albaran.app()
     run()

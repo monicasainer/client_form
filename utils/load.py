@@ -26,6 +26,9 @@ class Load:
         # Authenticate using the service account credentials
         credentials = service_account.Credentials.from_service_account_info(
         st.secrets["gcp_service_account"], scopes=scope)
+        # path = os.getenv("PATH_TO_CREDENTIALS")
+
+        # credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
 
         # Authorize the client
         client = authorize(credentials)
