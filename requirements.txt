@@ -7,7 +7,8 @@ google-auth==2.35.0
 google-auth-oauthlib==1.2.1
 gspread==5.10.0
 gspread-pandas==3.3.0
-
+google-auth-httplib2
+google-api-python-client
 # Utils for forms, selection, and menus
 streamlit-option-menu
 streamlit-drawable-canvas
