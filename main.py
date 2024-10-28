@@ -3,8 +3,6 @@ from streamlit_option_menu import option_menu
 import Inicio,Modificar,Nuevo,Albaran
 
 
-
-
 class ClientForm:
     def __init__(self) -> None:
         self.apps =[]

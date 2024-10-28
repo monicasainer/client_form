@@ -10,8 +10,9 @@ gspread-pandas==3.3.0
 
 # Utils for forms, selection, and menus
 streamlit-option-menu
+streamlit-drawable-canvas
 
 # Additional utilities
 pathlib==1.0.1
-
-
+python-docx
+docx2pdf

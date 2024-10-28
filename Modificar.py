@@ -3,7 +3,6 @@ from utils.extract import Extract
 from utils.load import Load
 from datetime import datetime
 import streamlit as st
-from uuid import uuid4
 
 def app():
 
