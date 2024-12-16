@@ -13,12 +13,12 @@ def app():
     data = Extract.load_data("Informacion_de_clientes","clientes")
 
     # Extraer valores únicos de la columna 'nombre'
-    df_unique = data['nombre'].drop_duplicates()
+    df_unique = data['razón_social'].drop_duplicates()
     names_list = df_unique.unique()
 
     # Crear formulario de Streamlit
     with st.form(key='company_form', clear_on_submit=True):
-        company_name = st.text_input("Nombre del nuevo cliente:")
+        company_name = st.text_input("Razón Social del nuevo cliente:")
         transformed_name = Transform.capital_letters(company_name)
 
         # Validar si el nombre ya existe
@@ -26,9 +26,12 @@ def app():
             st.warning(f"¡La compañía '{transformed_name}' ya existe! Clica en 'Modificar'")
 
             # Deshabilitar el resto de los campos si el nombre ya existe
+            st.text_input("Nombre persona contacto:", disabled=True)
             st.text_input("CIF:", disabled=True)
             st.text_input("Dirección de correo electrónico:", disabled=True)
+            st.text_input("Otras direcciones de correo electrónico:", disabled=True)
             st.number_input("Número de teléfono:", step=1, disabled=True)
+            st.number_input("Número de teléfono persona de contacto:", disabled=True)
             st.text_input("Dirección:", disabled=True)
             st.number_input("Código postal:", step=1, disabled=True)
             st.text_input("Municipio:", disabled=True)
@@ -54,8 +57,10 @@ def app():
 
         else:
             # Si no hay coincidencia, permitir la entrada de datos
+            contact_name = st.text_input("Nombre persona contacto:")
             cif = st.text_input("CIF:")
             email = st.text_input("Dirección de correo electrónico:")
+            other_emails = st.text_input("Otras direcciones de correo electrónico:")
             email_warning = False
 
             # Validar en tiempo real el formato del correo electrónico
@@ -64,8 +69,11 @@ def app():
                 st.warning("¡No es una dirección de correo electrónico válida!")
 
             if not email_warning:
+                contact_name = Transform.capital_letters(contact_name)
                 email = Transform.lowercase_letters(email)
+                other_emails = Transform.lowercase_letters(other_emails)
                 phone = st.number_input("Número de teléfono:", step=1)
+                contact_phone = st.number_input("Número de teléfono persona de contacto:",step=1)
                 address = st.text_input("Dirección:")
                 address  = Transform.capital_letters(address)
                 code = st.number_input("Código postal:", step=1)
@@ -101,7 +109,7 @@ def app():
                 customer_id = str(uuid4())
                 version = 1
 
-                row = [customer_id, transformed_name, cif, email, phone, address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
+                row = [customer_id, transformed_name, contact_name, cif, email, other_emails, phone, contact_phone,address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
 
         # Mover el botón dentro del bloque del formulario
         submit_button = st.form_submit_button(label='¡Listo!')

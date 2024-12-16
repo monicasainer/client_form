@@ -2,6 +2,7 @@ from google.oauth2 import service_account
 from gspread_pandas import Spread, Client
 from googleapiclient.discovery import build
 import pandas as pd
+import os
 import re
 import streamlit as st
 
@@ -21,12 +22,12 @@ class Extract:
         scope = ["https://spreadsheets.google.com/feeds",
                 "https://www.googleapis.com/auth/drive"]
 
-        credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
+        # credentials = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
 
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
 
-        # credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
+        credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
 
         # Create a client to interact with Google Sheets using the credentials
         clients = Client(scope=scope, creds=credentials)
@@ -62,12 +63,12 @@ class Extract:
             Exception: If an error occurs during deletion.
         """
         scopes = ["https://www.googleapis.com/auth/drive"]
-        creds = service_account.Credentials.from_service_account_info( st.secrets["gcp_service_account"], scopes=scopes)
+        # creds = service_account.Credentials.from_service_account_info( st.secrets["gcp_service_account"], scopes=scopes)
 
-        # creds_path = os.getenv("PATH_TO_CREDENTIALS")
-        # creds = service_account.Credentials.from_service_account_file(
-        #     creds_path, scopes=["https://www.googleapis.com/auth/drive"]
-        # )
+        creds_path = os.getenv("PATH_TO_CREDENTIALS")
+        creds = service_account.Credentials.from_service_account_file(
+            creds_path, scopes=["https://www.googleapis.com/auth/drive"]
+        )
         drive_service = build("drive", "v3", credentials=creds)
 
         try:
@@ -112,12 +113,12 @@ class Extract:
             None
         """
 
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope = ["https://www.googleapis.com/auth/documents"]
-        creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
 
         # Load the credentials
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         doc_service = build('docs', 'v1', credentials=creds)
 
         # Fetch the document content
@@ -168,14 +169,14 @@ class Extract:
         :return: The folder ID if found, otherwise None.
         """
         scope=["https://www.googleapis.com/auth/drive"]
-        creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
 
-        # creds_path = os.getenv("PATH_TO_CREDENTIALS")
+        creds_path = os.getenv("PATH_TO_CREDENTIALS")
         # Authenticate and create a service client for Google Drive
-        # creds = service_account.Credentials.from_service_account_file(
-        #     creds_path, scopes=["https://www.googleapis.com/auth/drive"]
-        # )
+        creds = service_account.Credentials.from_service_account_file(
+            creds_path, scopes=["https://www.googleapis.com/auth/drive"]
+        )
         drive_service = build("drive", "v3", credentials=creds)
 
         try:

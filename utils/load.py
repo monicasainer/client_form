@@ -3,6 +3,7 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseUpload
 from gspread import authorize
 import streamlit as st
+import os
 from io import BytesIO
 from PIL import Image
 
@@ -24,11 +25,11 @@ class Load:
                  "https://www.googleapis.com/auth/drive"]
 
         # Authenticate using the service account credentials
-        credentials = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        # credentials = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
+        path = os.getenv("PATH_TO_CREDENTIALS")
 
-        # credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
+        credentials = service_account.Credentials.from_service_account_file(f"{path}", scopes=scope)
 
         # Authorize the client
         client = authorize(credentials)
@@ -68,15 +69,16 @@ class Load:
         """
         # Authenticate using the service account credentials
 
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope = ["https://spreadsheets.google.com/feeds",
                 "https://www.googleapis.com/auth/drive"]
 
-        creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
+
 
         # Load the credentials
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         drive_service = build('drive', 'v3', credentials=creds)
 
         # Check if the subfolder (with client_id) exists
@@ -128,12 +130,12 @@ class Load:
             None
         """
         scope = ["https://www.googleapis.com/auth/documents"]
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         # Load the credentials
-        creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
 
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         doc_service = build('docs', 'v1', credentials=creds)
 
         # Fetch the document content
@@ -205,15 +207,15 @@ class Load:
             tuple: (str, str) The Google Drive file ID and public URL of the uploaded image.
         """
 
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope =["https://www.googleapis.com/auth/drive"]
 
         # Load credentials
-        # creds = service_account.Credentials.from_service_account_file(
-        #     path, scopes=["https://www.googleapis.com/auth/drive"]
-        # )
-        creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(
+            path, scopes=["https://www.googleapis.com/auth/drive"]
+        )
+        # creds = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
 
 
         drive_service = build('drive', 'v3', credentials=creds)
@@ -262,13 +264,13 @@ class Load:
             None
         """
 
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope = ["https://www.googleapis.com/auth/documents"]
 
         # Load the credentials
-        creds = service_account.Credentials.from_service_account_info(
-        st.secrets["gcp_service_account"], scopes=scope)
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(
+        # st.secrets["gcp_service_account"], scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         doc_service = build('docs', 'v1', credentials=creds)
 
         document = doc_service.documents().get(documentId=document_id).execute()

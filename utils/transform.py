@@ -5,6 +5,7 @@ from googleapiclient.http import MediaIoBaseDownload,MediaIoBaseUpload
 import streamlit as st
 from utils.extract import Extract
 from io import BytesIO
+import os
 
 
 class Transform:
@@ -59,13 +60,13 @@ class Transform:
         Returns:
             None
         """
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope = ["https://spreadsheets.google.com/feeds",
                 "https://www.googleapis.com/auth/drive"]
-        creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
 
         # Load the credentials
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         drive_service = build('drive', 'v3', credentials=creds)
 
         # New name for the file
@@ -90,13 +91,13 @@ class Transform:
         :param delete_original: If True, deletes the original DOCX file after conversion.
         :return: The file ID of the newly created Google Docs file.
         """
-        # path = os.getenv("PATH_TO_CREDENTIALS")
+        path = os.getenv("PATH_TO_CREDENTIALS")
         scope = ["https://spreadsheets.google.com/feeds",
                 "https://www.googleapis.com/auth/drive"]
 
-        creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
         # Load the credentials
-        # creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
+        creds = service_account.Credentials.from_service_account_file(path, scopes=scope)
         drive_service = build('drive', 'v3', credentials=creds)
         # Define the Google Docs MIME type
         google_docs_mime_type = 'application/vnd.google-apps.document'
@@ -135,12 +136,12 @@ class Transform:
         """
         # Authenticate and create service clients for Google Drive and Docs
         scope=["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/documents"]
-        creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
+        # creds = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=scope)
 
-        # creds_path = os.getenv("PATH_TO_CREDENTIALS")
-        # creds = service_account.Credentials.from_service_account_file(
-        #     creds_path, scopes=["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/documents"]
-        # )
+        creds_path = os.getenv("PATH_TO_CREDENTIALS")
+        creds = service_account.Credentials.from_service_account_file(
+            creds_path, scopes=["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/documents"]
+         )
         drive_service = build("drive", "v3", credentials=creds)
 
         # Step 1: Export the Google Doc as a PDF

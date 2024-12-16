@@ -12,7 +12,7 @@ def app():
     data = Extract.load_data("Informacion_de_clientes", "clientes")
 
     # Extraer valores únicos de la columna 'nombre'
-    df_unique = data['nombre'].drop_duplicates()
+    df_unique = data['razón_social'].drop_duplicates()
     names_list = df_unique.unique()
 
     # Seleccionar la compañía fuera del formulario para que sea dinámico
@@ -20,12 +20,12 @@ def app():
 
     # Filtrar los datos con base en el nombre de la compañía seleccionado
     if company_name:
-        df_filtered = data[data['nombre'] == company_name]
+        df_filtered = data[data['razón_social'] == company_name]
 
         # Mostrar los detalles del cliente con la versión máxima
         df_max_v = df_filtered.loc[df_filtered['versión'].idxmax()]
 
-        st.write(f"Has seleccionado la compañía: {df_max_v['nombre']}")
+        st.write(f"Has seleccionado la compañía: {df_max_v['razón_social']}")
 
         # Lista de campos modificables
         fields = [
