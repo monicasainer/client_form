@@ -16,7 +16,7 @@ def app():
     data = Extract.load_data("Informacion_de_clientes", "clientes")
     albaran = Extract.load_data("Informacion_de_clientes", "albarán")
     # Extraer valores únicos de la columna 'nombre'
-    df_unique = data['nombre'].drop_duplicates()
+    df_unique = data['razón_social'].drop_duplicates()
     names_list = df_unique.unique()
 
     opciones = ["Cliente Nuevo", "Cliente Habitual"]
@@ -30,14 +30,14 @@ def app():
 
         if company_name:
             # Filter data based on selected company name
-            df_filtered = data[data['nombre'] == company_name]
+            df_filtered = data[data['razón_social'] == company_name]
 
             if not df_filtered.empty:  # Check if df_filtered is not empty
                 df_max_v = df_filtered.loc[df_filtered['versión'].idxmax()]
                 cliente_id = df_filtered['cliente_id'].unique()[0]
                 print(cliente_id)
                 # Display selected company details
-                st.write(f"Has seleccionado la compañía: {df_max_v['nombre']}")
+                st.write(f"Has seleccionado la compañía: {df_max_v['razón_social']}")
                 try:
                     # Convert the column to numeric, forcing errors to NaN (useful for cleaning)
                     albaran['albarán_id'] = pd.to_numeric(albaran['albarán_id'], errors='coerce')
