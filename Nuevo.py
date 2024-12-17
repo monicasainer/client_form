@@ -29,7 +29,7 @@ def app():
         st.text_input("Nombre persona contacto:", disabled=True)
         st.text_input("CIF:", disabled=True)
         st.text_input("Dirección de correo electrónico:", disabled=True)
-        st.text_input("Otras direcciones de correo electrónico:", disabled=True)
+        st.text_area("Otras direcciones de correo electrónico:", disabled=True)
         st.number_input("Número de teléfono:", step=1, disabled=True)
         st.number_input("Número de teléfono persona de contacto:", disabled=True)
         st.text_input("Dirección:", disabled=True)
@@ -59,8 +59,9 @@ def app():
         # Si no hay coincidencia, permitir la entrada de datos
         contact_name = st.text_input("Nombre persona contacto:")
         cif = st.text_input("CIF:")
+        cif = Transform.capital_letters(cif)
         email = st.text_input("Dirección de correo electrónico:")
-        other_emails = st.text_input("Otras direcciones de correo electrónico:")
+        other_emails = st.text_area("Otras direcciones de correo electrónico:")
         email_warning = False
 
         # Validar en tiempo real el formato del correo electrónico

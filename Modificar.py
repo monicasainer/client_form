@@ -29,7 +29,8 @@ def app():
 
         # Lista de campos modificables
         fields = [
-            "CIF", "Email", "Teléfono", "Dirección",
+            "Nombre persona contacto","CIF", "Email","Otros correos electrónicos", "Teléfono",
+            "Teléfono persona contacto","Dirección",
             "Código Postal", "Municipio", "Provincia",
             "País", "Número de empleados", "Industria"
         ]
@@ -43,9 +44,16 @@ def app():
         with st.form(key='company_form', clear_on_submit=True):
 
             # Campos seleccionados para modificar
+
+            contact_name = df_max_v['nombre_contacto']
+            if "Nombre persona contacto" in selected_fields:
+                contact_name = st.text_input(f"Nombre persona contacto (Actual: {df_max_v['nombre_contacto']}):")
+                contact_name = Transform.capital_letters(contact_name)
+
             cif = df_max_v['cif']
             if "CIF" in selected_fields:
                 cif = st.text_input(f"CIF (Actual: {df_max_v['cif']}):")
+                cif = Transform.capital_letters(cif)
 
             email = df_max_v['correo_electrónico']
             if "Email" in selected_fields:
@@ -58,11 +66,22 @@ def app():
                 if not email_warning and email:
                     email = Transform.lowercase_letters(email)
 
+            other_emails = df_max_v['otros_correos_electrónicos']
+            if "Otros correos electrónicos" in selected_fields:
+                other_emails = st.text_area(f"Otros correos electrónicos (Actual: {df_max_v['otros_correos_electrónicos']}):")
+                other_emails = Transform.lowercase_letters(other_emails)
+
             phone = df_max_v['teléfono']
             if "Teléfono" in selected_fields:
                 phone_input = st.number_input(f"Teléfono (Actual: {df_max_v['teléfono']}):",step=1)
                 # Check for empty input before conversion
                 phone = int(phone_input) if phone_input else df_max_v['teléfono']
+
+            contact_phone = df_max_v['teléfono_contacto']
+            if "Teléfono persona contacto" in selected_fields:
+                phone_input = st.number_input(f"Teléfono persona contacto (Actual: {df_max_v['teléfono_contacto']}):",step=1)
+                # Check for empty input before conversion
+                contact_phone = int(phone_input) if phone_input else df_max_v['teléfono_contacto']
 
             address = df_max_v['domicilio']
             if "Dirección" in selected_fields:
@@ -127,7 +146,7 @@ def app():
             customer_id = str(df_max_v['cliente_id'])
             version = int(df_max_v['versión']) + 1
 
-            row = [customer_id, company_name, cif, email, phone, address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
+            row = [customer_id, company_name,contact_name, cif, email, other_emails, phone, contact_phone, address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
 
             # Botón de envío
             submit_button = st.form_submit_button(label='¡Listo!')
