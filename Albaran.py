@@ -18,6 +18,7 @@ def app():
     # Extraer valores únicos de la columna 'nombre'
     df_unique = data['razón_social'].drop_duplicates()
     names_list = df_unique.unique()
+    complete_information = False
 
     opciones = ["Cliente Nuevo", "Cliente Habitual"]
 
@@ -56,8 +57,8 @@ def app():
                 # Dynamically handle the number of tasks
                 date = st.date_input("Fecha actual", value=datetime.now())
 
-                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck')
-                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver')
+                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck', index=None)
+                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver', index=None)
                 route = st.text_input('Ruta:')
                 exit_units = st.number_input(f'¿Cuántas unidades de salida?',step=1)
                 km_units = st.number_input(f'¿Cuántos kilómetros?',step=1)
@@ -70,9 +71,19 @@ def app():
                 date_str = date.strftime("%Y-%m-%d")
                 ingestion_date = datetime.now()
                 ingestion_date_str = ingestion_date.strftime("%Y-%m-%d %H:%M:%S")
-                row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
 
-                tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+                if driver and truck:
+                    row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
+                    tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+                    complete_information = True
+
+                if not driver:
+                    st.warning("Selecciona el conductor que ha realizado la tarea.")
+                    complete_information = False
+                if not truck:
+                    st.warning("Selecciona el camión que se ha utilizado en la tarea.")
+                    complete_information = False
+
 
                 if consent:
                     dni = st.text_input("Escribe tu DNI:")
@@ -93,7 +104,7 @@ def app():
                 with st.form(key='company_form', clear_on_submit=True):
                     submit_button = st.form_submit_button(label='¡Listo!')
 
-                    if submit_button and consent and canvas_result.image_data is not None:
+                    if submit_button and consent and canvas_result.image_data is not None and complete_information:
                         Load().append_row("Informacion_de_clientes", "albarán", row)
 
 
@@ -108,7 +119,7 @@ def app():
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
-                        folder_id = '1_nJLKLvV4Ge66LzH38uAyCjBlp2Dm2DU' #st.secrets["folder_id"]
+                        folder_id = st.secrets["folder_id"]
 
                         document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)
@@ -147,7 +158,7 @@ def app():
 
                         st.success("¡Guardado con éxito!")
 
-                    elif submit_button and consent==False:
+                    elif submit_button and consent==False and complete_information:
                         Load().append_row("Informacion_de_clientes", "albarán", row)
                         customer_details ={
                             "[Company]":str(company_name),
@@ -160,7 +171,7 @@ def app():
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
-                        folder_id = "1_nJLKLvV4Ge66LzH38uAyCjBlp2Dm2DU" #st.secrets["folder_id"]
+                        folder_id = st.secrets["folder_id"]
 
                         document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)
@@ -308,8 +319,8 @@ def app():
 
                 row_creation = [customer_id, transformed_name, contact_name, cif, email, other_emails, phone, contact_phone,address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
 
-                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck')
-                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver')
+                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck', index=None)
+                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver', index=None)
                 route = st.text_input('Ruta:')
                 exit_units = st.number_input(f'¿Cuántas unidades de salida?',step=1)
                 km_units = st.number_input(f'¿Cuántos kilómetros?',step=1)
@@ -319,10 +330,21 @@ def app():
                 description = st.text_area('Descripción Trabajos realizados:')
                 obs = st.text_area(f'Observaciones')
                 email = df_max_v['correo_electrónico']
-                row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,
-                       km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
 
-                tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+
+                if driver and truck:
+                    row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,
+                       km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
+                    tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+                    complete_information = True
+
+                if not driver:
+                    st.warning("Selecciona el conductor que ha realizado la tarea.")
+                    complete_information = False
+                if not truck:
+                    st.warning("Selecciona el camión que se ha utilizado en la tarea.")
+                    complete_information = False
+
 
                 if consent:
                     dni = st.text_input("Escribe tu DNI:")
@@ -343,7 +365,7 @@ def app():
                 with st.form(key='company_form', clear_on_submit=True):
                     submit_button = st.form_submit_button(label='¡Listo!')
 
-                    if submit_button and consent and canvas_result.image_data is not None:
+                    if submit_button and consent and canvas_result.image_data is not None and complete_information:
                         Load().append_row("Informacion_de_clientes", "clientes", row_creation)
                         Load().append_row("Informacion_de_clientes", "albarán", row)
 
@@ -358,7 +380,7 @@ def app():
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
-                        folder_id = '1_nJLKLvV4Ge66LzH38uAyCjBlp2Dm2DU' #st.secrets["folder_id"]
+                        folder_id = st.secrets["folder_id"]
 
                         document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)
@@ -394,7 +416,7 @@ def app():
 
                         st.success("¡Guardado con éxito!")
 
-                    elif submit_button and consent==False:
+                    elif submit_button and consent==False and complete_information:
                         Load().append_row("Informacion_de_clientes", "clientes", row_creation)
                         Load().append_row("Informacion_de_clientes", "albarán", row)
                         customer_details ={
@@ -408,7 +430,7 @@ def app():
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
-                        folder_id = "1_nJLKLvV4Ge66LzH38uAyCjBlp2Dm2DU"#st.secrets["folder_id"]
+                        folder_id = st.secrets["folder_id"]
 
                         document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)

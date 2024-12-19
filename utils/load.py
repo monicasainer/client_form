@@ -233,7 +233,7 @@ class Load:
         buffered.seek(0)
 
         # Define the file metadata for Drive
-        folder_id = "1_nJLKLvV4Ge66LzH38uAyCjBlp2Dm2DU" #st.secrets["folder_id"]
+        folder_id = st.secrets["folder_id"]
         file_metadata = {
             "name": "your_image.png",  # Name of the file in Google Drive
             "parents": [str(folder_id)]    # Specify the folder to upload to
