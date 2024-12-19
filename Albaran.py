@@ -18,11 +18,12 @@ def app():
     # Extraer valores únicos de la columna 'nombre'
     df_unique = data['razón_social'].drop_duplicates()
     names_list = df_unique.unique()
+    complete_information = False
 
     opciones = ["Cliente Nuevo", "Cliente Habitual"]
 
     # Select fields to modify
-    selected_fields = st.selectbox("Seleccione los campos que desea modificar:", opciones,index=None)
+    selected_fields = st.selectbox("Seleccione el tipo de empresa para crear el albarán:", opciones,index=None)
 
     if selected_fields == "Cliente Habitual":
         # Select company name outside of the form
@@ -55,27 +56,35 @@ def app():
 
                 # Dynamically handle the number of tasks
                 date = st.date_input("Fecha actual", value=datetime.now())
-                num_tasks = st.number_input('¿Cuántas tareas quieres añadir?', min_value=1, step=1)
 
-                list_rows = []
-                tasks_row =[]
-                for i in range(int(num_tasks)):
-                    task_name = st.text_input(f'Describe la tarea {i + 1}:', key=f'task_name_{i}')
-                    task_value = st.number_input(f'¿Cuántas horas ha tomado la tarea {i + 1}?', key=f'task_value_{i}', min_value=0)
-                    truck = st.selectbox(f'Indica el camión para la tarea {i + 1}:', ("Camión 1", "Camión 2", "Camión 3"), key=f'truck_{i}')
-                    driver = st.selectbox(f'Indica el chófer para la tarea {i + 1}:', ("Chófer 1", "Chófer 2", "Chófer 3"), key=f'driver_{i}')
-                    new_list = [i+1,task_name,task_value]
-                    print (new_list)
-                    tasks_row.append(new_list)
-                    # Prepare row for each task
-                    email = df_max_v['correo_electrónico']
-                    date_str = date.strftime("%Y-%m-%d")
-                    ingestion_date = datetime.now()
-                    ingestion_date_str = ingestion_date.strftime("%Y-%m-%d %H:%M:%S")
+                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck', index=None)
+                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver', index=None)
+                route = st.text_input('Ruta:')
+                exit_units = st.number_input(f'¿Cuántas unidades de salida?',step=1)
+                km_units = st.number_input(f'¿Cuántos kilómetros?',step=1)
+                crane = st.number_input(f'¿Cuántas horas de trabajo de grúa?',step=1)
+                discharge_units = st.number_input(f'¿Cuántas unidades de descarga?',step=1)
+                minimum_service = st.checkbox("Servicio Mínimo")
+                description = st.text_area('Descripción Trabajos realizados:')
+                obs = st.text_area(f'Observaciones')
+                email = df_max_v['correo_electrónico']
+                date_str = date.strftime("%Y-%m-%d")
+                ingestion_date = datetime.now()
+                ingestion_date_str = ingestion_date.strftime("%Y-%m-%d %H:%M:%S")
 
-                    row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, task_name, task_value, truck, driver, date_str, consent,ingestion_date_str]
-                    list_rows.append(row)
-                print(tasks_row)
+                if driver and truck:
+                    row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
+                    tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+                    complete_information = True
+
+                if not driver:
+                    st.warning("Selecciona el conductor que ha realizado la tarea.")
+                    complete_information = False
+                if not truck:
+                    st.warning("Selecciona el camión que se ha utilizado en la tarea.")
+                    complete_information = False
+
+
                 if consent:
                     dni = st.text_input("Escribe tu DNI:")
                 # Create a canvas component
@@ -95,9 +104,8 @@ def app():
                 with st.form(key='company_form', clear_on_submit=True):
                     submit_button = st.form_submit_button(label='¡Listo!')
 
-                    if submit_button and consent and canvas_result.image_data is not None:
-                        for element in list_rows:
-                            Load().append_row("Informacion_de_clientes", "albarán", element)
+                    if submit_button and consent and canvas_result.image_data is not None and complete_information:
+                        Load().append_row("Informacion_de_clientes", "albarán", row)
 
 
                         customer_details ={
@@ -121,12 +129,23 @@ def app():
                         n_tareas= len(tasks_row)
                         # Create the dictionary
                         result_dict = {}
+                        tareas = 0
 
-                        for i in range(n_tareas):
-                            result_dict[f"[Tarea {i+1}]"] = str(i +1)
-                            result_dict[f"[Descripcion {i+1}]"] = str(tasks_row[i][1])  # Second element (description)
-                            result_dict[f"[Horas {i+1}]"] = str(tasks_row[i][2])       # Third element (hours)
-                            result_dict["[dni]"] = str(dni)
+                        for description, value in tasks_row.items():
+                            # Check if the value is valid (not 0, empty, or False)
+                            if value not in (0, '', False):
+                                tareas += 1  # Increment task count
+                                result_dict[f"[Tarea {tareas}]"] = str(tareas)  # Add task number
+                                result_dict[f"[Descripcion {tareas}]"] = description  # Add task description
+                                if value is True:  # If the value is True, use 1 as hours
+                                    result_dict[f"[Horas {tareas}]"] = "1"
+                                else:  # Otherwise, use the value directly
+                                    result_dict[f"[Horas {tareas}]"] = str(value)
+
+
+                        result_dict["[dni]"] = str(dni)
+
+
 
                         print(result_dict)
                         Load.replace_placeholders_in_doc(new_document_id,result_dict)
@@ -139,10 +158,8 @@ def app():
 
                         st.success("¡Guardado con éxito!")
 
-                    elif submit_button and consent==False:
-
-                        for element in list_rows:
-                            Load().append_row("Informacion_de_clientes", "albarán", element)
+                    elif submit_button and consent==False and complete_information:
+                        Load().append_row("Informacion_de_clientes", "albarán", row)
                         customer_details ={
                             "[Company]":str(company_name),
                             "[Address]":str(df_max_v['domicilio']),
@@ -164,12 +181,20 @@ def app():
                         n_tareas= len(tasks_row)
                         # Create the dictionary
                         result_dict = {}
+                        tareas = 0
 
-                        for i in range(n_tareas):
-                            result_dict[f"[Tarea {i+1}]"] = str(i +1)
-                            result_dict[f"[Descripcion {i+1}]"] = str(tasks_row[i][1])  # Second element (description)
-                            result_dict[f"[Horas {i+1}]"] = str(tasks_row[i][2])       # Third element (hours)
-                            result_dict["[dni]"] = str(" ")
+                        for description, value in tasks_row.items():
+                            # Check if the value is valid (not 0, empty, or False)
+                            if value not in (0, '', False):
+                                tareas += 1  # Increment task count
+                                result_dict[f"[Tarea {tareas}]"] = str(tareas)  # Add task number
+                                result_dict[f"[Descripcion {tareas}]"] = description  # Add task description
+                                if value is True:  # If the value is True, use 1 as hours
+                                    result_dict[f"[Horas {tareas}]"] = "1"
+                                else:  # Otherwise, use the value directly
+                                    result_dict[f"[Horas {tareas}]"] = str(value)
+
+                        result_dict["[dni]"] = str(" ")
 
                         print(result_dict)
                         Load.replace_placeholders_in_doc(new_document_id,result_dict)
@@ -191,9 +216,12 @@ def app():
             st.warning(f"¡La compañía '{transformed_name}' ya existe! Clica en 'Modificar'")
 
             # Disable other fields if the name already exists
+            st.text_input("Nombre persona contacto:", disabled=True)
             st.text_input("CIF:", disabled=True)
             st.text_input("Dirección de correo electrónico:", disabled=True)
+            st.text_area("Otras direcciones de correo electrónico:", disabled=True)
             st.number_input("Número de teléfono:", step=1, disabled=True)
+            st.number_input("Número de teléfono persona de contacto:", disabled=True)
             st.text_input("Dirección:", disabled=True)
             st.number_input("Código postal:", step=1, disabled=True)
             st.text_input("Municipio:", disabled=True)
@@ -219,8 +247,11 @@ def app():
 
         else:
             # Allow data entry if no match
+            contact_name = st.text_input("Nombre persona contacto:")
             cif = st.text_input("CIF:")
+            cif = Transform.capital_letters(cif)
             email = st.text_input("Dirección de correo electrónico:")
+            other_emails = st.text_area("Otras direcciones de correo electrónico:")
             email_warning = False
 
             # Validate email format in real-time
@@ -229,8 +260,11 @@ def app():
                 st.warning("¡No es una dirección de correo electrónico válida!")
 
             if not email_warning:
+                contact_name = Transform.capital_letters(contact_name)
                 email = Transform.lowercase_letters(email)
+                other_emails = Transform.lowercase_letters(other_emails)
                 phone = st.number_input("Número de teléfono:", step=1)
+                contact_phone = st.number_input("Número de teléfono persona de contacto:",step=1)
                 address = st.text_input("Dirección:")
                 address = Transform.capital_letters(address)
                 code = st.number_input("Código postal:", step=1)
@@ -283,29 +317,35 @@ def app():
                 customer_id = str(uuid4())
                 version = 1
 
-                row_creation = [customer_id, transformed_name, cif, email, phone, address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
+                row_creation = [customer_id, transformed_name, contact_name, cif, email, other_emails, phone, contact_phone,address, code, municipality, city, country, n_employees, industry, date_str, info, version, ingestion_date_str]
 
-                num_tasks = st.number_input('¿Cuántas tareas quieres añadir?', min_value=1, step=1)
+                truck = st.selectbox(f'Indica el camión que se ha necesitado:', ("Camión 1", "Camión 2", "Camión 3", "Camión 4"), key=f'truck', index=None)
+                driver = st.selectbox(f'Indica el chófer para este trabajo:', ("Chófer 1", "Chófer 2", "Chófer 3"), key='driver', index=None)
+                route = st.text_input('Ruta:')
+                exit_units = st.number_input(f'¿Cuántas unidades de salida?',step=1)
+                km_units = st.number_input(f'¿Cuántos kilómetros?',step=1)
+                crane = st.number_input(f'¿Cuántas horas de trabajo de grúa?',step=1)
+                discharge_units = st.number_input(f'¿Cuántas unidades de descarga?',step=1)
+                minimum_service = st.checkbox("Servicio Mínimo")
+                description = st.text_area('Descripción Trabajos realizados:')
+                obs = st.text_area(f'Observaciones')
+                email = df_max_v['correo_electrónico']
 
-                list_rows = []
-                tasks_row =[]
-                for i in range(int(num_tasks)):
-                    task_name = st.text_input(f'Describe la tarea {i + 1}:', key=f'task_name_{i}')
-                    task_value = st.number_input(f'¿Cuántas horas ha tomado la tarea {i + 1}?', key=f'task_value_{i}', min_value=0)
-                    truck = st.selectbox(f'Indica el camión para la tarea {i + 1}:', ("Camión 1", "Camión 2", "Camión 3"), key=f'truck_{i}')
-                    driver = st.selectbox(f'Indica el chófer para la tarea {i + 1}:', ("Chófer 1", "Chófer 2", "Chófer 3"), key=f'driver_{i}')
-                    new_list = [i+1,task_name,task_value]
-                    print (new_list)
-                    tasks_row.append(new_list)
-                    # Prepare row for each task
-                    email = email
-                    date_str = date.strftime("%Y-%m-%d")
-                    ingestion_date = datetime.now()
-                    ingestion_date_str = ingestion_date.strftime("%Y-%m-%d %H:%M:%S")
 
-                    row = [int(albaran_id), customer_id, transformed_name, email, task_name, task_value, truck, driver, date_str, consent,ingestion_date_str]
-                    list_rows.append(row)
-                print(tasks_row)
+                if driver and truck:
+                    row = [int(albaran_id), df_max_v['cliente_id'], company_name, email, route, description,obs,exit_units,
+                       km_units, crane, discharge_units, minimum_service, truck, driver, date_str, consent,ingestion_date_str]
+                    tasks_row = {"Ruta":route, "Unidades de salida":exit_units,"Kilómetros":km_units, "Horas trabajo de grúa":crane, "Unidades de Descarga":discharge_units, "Servicio mínimo":minimum_service}
+                    complete_information = True
+
+                if not driver:
+                    st.warning("Selecciona el conductor que ha realizado la tarea.")
+                    complete_information = False
+                if not truck:
+                    st.warning("Selecciona el camión que se ha utilizado en la tarea.")
+                    complete_information = False
+
+
                 if consent:
                     dni = st.text_input("Escribe tu DNI:")
                 # Create a canvas component
@@ -325,25 +365,24 @@ def app():
                 with st.form(key='company_form', clear_on_submit=True):
                     submit_button = st.form_submit_button(label='¡Listo!')
 
-                    if submit_button and consent and canvas_result.image_data is not None:
+                    if submit_button and consent and canvas_result.image_data is not None and complete_information:
                         Load().append_row("Informacion_de_clientes", "clientes", row_creation)
-                        for element in list_rows:
-                            Load().append_row("Informacion_de_clientes", "albarán", element)
+                        Load().append_row("Informacion_de_clientes", "albarán", row)
 
                         customer_details ={
-                            "[Company]":str(transformed_name),
-                            "[Address]":str(address),
-                            "[Municipality]":str(municipality),
-                            "[City]":str(city),
-                            "[Phone]":str(phone),
-                            "[Email]":str(email),
+                            "[Company]":str(company_name),
+                            "[Address]":str(df_max_v['domicilio']),
+                            "[Municipality]":str(df_max_v['municipio']),
+                            "[City]":str(df_max_v['provincia']),
+                            "[Phone]":str(df_max_v['teléfono']),
+                            "[Email]":str(df_max_v['correo_electrónico']),
                             "[albarán_id]": str(albaran_id),
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
                         folder_id = st.secrets["folder_id"]
 
-                        document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(customer_id))
+                        document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)
                         new_document_id = Transform.convert_to_google_docs(document_id, True)
                         Load.replace_placeholders_in_doc(new_document_id,customer_details)
@@ -351,12 +390,20 @@ def app():
                         n_tareas= len(tasks_row)
                         # Create the dictionary
                         result_dict = {}
+                        tareas = 0
 
-                        for i in range(n_tareas):
-                            result_dict[f"[Tarea {i+1}]"] = str(i +1)
-                            result_dict[f"[Descripcion {i+1}]"] = str(tasks_row[i][1])  # Second element (description)
-                            result_dict[f"[Horas {i+1}]"] = str(tasks_row[i][2])       # Third element (hours)
-                            result_dict["[dni]"] = str(dni)
+                        for description, value in tasks_row.items():
+                            # Check if the value is valid (not 0, empty, or False)
+                            if value not in (0, '', False):
+                                tareas += 1  # Increment task count
+                                result_dict[f"[Tarea {tareas}]"] = str(tareas)  # Add task number
+                                result_dict[f"[Descripcion {tareas}]"] = description  # Add task description
+                                if value is True:  # If the value is True, use 1 as hours
+                                    result_dict[f"[Horas {tareas}]"] = "1"
+                                else:  # Otherwise, use the value directly
+                                    result_dict[f"[Horas {tareas}]"] = str(value)
+
+                        result_dict["[dni]"] = str(dni)
 
                         print(result_dict)
                         Load.replace_placeholders_in_doc(new_document_id,result_dict)
@@ -369,24 +416,23 @@ def app():
 
                         st.success("¡Guardado con éxito!")
 
-                    elif submit_button and consent==False:
+                    elif submit_button and consent==False and complete_information:
                         Load().append_row("Informacion_de_clientes", "clientes", row_creation)
-                        for element in list_rows:
-                            Load().append_row("Informacion_de_clientes", "albarán", element)
+                        Load().append_row("Informacion_de_clientes", "albarán", row)
                         customer_details ={
-                            "[Company]":str(transformed_name),
-                            "[Address]":str(address),
-                            "[Municipality]":str(municipality),
-                            "[City]":str(city),
-                            "[Phone]":str(phone),
-                            "[Email]":str(email),
+                            "[Company]":str(company_name),
+                            "[Address]":str(df_max_v['domicilio']),
+                            "[Municipality]":str(df_max_v['municipio']),
+                            "[City]":str(df_max_v['provincia']),
+                            "[Phone]":str(df_max_v['teléfono']),
+                            "[Email]":str(df_max_v['correo_electrónico']),
                             "[albarán_id]": str(albaran_id),
                             "[Date]":str(date_str),
                             "[Time]": str(ingestion_date.strftime("%H:%M:%S"))
                         }
                         folder_id = st.secrets["folder_id"]
 
-                        document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(customer_id))
+                        document_id = Load.upload_to_drive('template.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ,folder_id,str(cliente_id))
                         Transform.rename_file_in_drive(document_id,albaran_id,date_str)
                         new_document_id = Transform.convert_to_google_docs(document_id, True)
                         Load.replace_placeholders_in_doc(new_document_id,customer_details)
@@ -394,12 +440,20 @@ def app():
                         n_tareas= len(tasks_row)
                         # Create the dictionary
                         result_dict = {}
+                        tareas = 0
 
-                        for i in range(n_tareas):
-                            result_dict[f"[Tarea {i+1}]"] = str(i +1)
-                            result_dict[f"[Descripcion {i+1}]"] = str(tasks_row[i][1])  # Second element (description)
-                            result_dict[f"[Horas {i+1}]"] = str(tasks_row[i][2])       # Third element (hours)
-                            result_dict["[dni]"] = str(" ")
+                        for description, value in tasks_row.items():
+                            # Check if the value is valid (not 0, empty, or False)
+                            if value not in (0, '', False):
+                                tareas += 1  # Increment task count
+                                result_dict[f"[Tarea {tareas}]"] = str(tareas)  # Add task number
+                                result_dict[f"[Descripcion {tareas}]"] = description  # Add task description
+                                if value is True:  # If the value is True, use 1 as hours
+                                    result_dict[f"[Horas {tareas}]"] = "1"
+                                else:  # Otherwise, use the value directly
+                                    result_dict[f"[Horas {tareas}]"] = str(value)
+
+                        result_dict["[dni]"] = str(" ")
 
                         print(result_dict)
                         Load.replace_placeholders_in_doc(new_document_id,result_dict)
@@ -408,6 +462,9 @@ def app():
                         Extract.delete_file_from_google_drive(new_document_id)
 
                         st.success("¡Guardado con éxito!")
+
+            else:
+                st.warning("No se encontraron datos para la compañía seleccionada.")
 
 # Run the app
 if __name__ == "__main__":
